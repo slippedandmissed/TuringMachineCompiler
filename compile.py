@@ -7,17 +7,32 @@ if len(sys.argv) < 2:
     print("Not enough arguments provided")
     sys.exit()
 
+debug = False
+
+state_codes = {
+    "start": "start",
+    "runtime_error": "runtime_error"
+}
+
 src_file = sys.argv[1]
 out_file = (".".join(src_file.split(".")[:-1]) if "." in src_file else src_file)+".tur"
 
-def write(state, read, replace, direction, newState, cmd="%NOCMD%"):
+def write(state, read, replace, direction, new_state, cmd="%NOCMD%"):
     if state != "start" and not re.match(r"^ready[0-9]+$", state):
         state = f"{cmd}_{state}"
-    if newState != "start" and not re.match(r"^ready[0-9]+$", newState) and newState != "runtime_error" and newState != "done":
-        newState = f"{cmd}_{newState}"
+    if new_state != "start" and not re.match(r"^ready[0-9]+$", new_state) and new_state != "runtime_error" and new_state != "done":
+        new_state = f"{cmd}_{new_state}"
+    if not debug:
+        if state not in state_codes:
+            state_codes[state] = str(len(state_codes))
+        state = state_codes[state]
+
+        if new_state not in state_codes:
+            state_codes[new_state] = str(len(state_codes))
+        new_state = state_codes[new_state]
     with open(out_file, "a", encoding="utf-8") as out:
         arrow = "\u2190" if direction == "<" else "→"
-        out.write("\u0394(%s,%s) = (%s,%s,%s)\n" % (state, read, replace, arrow, newState))
+        out.write("\u0394(%s,%s) = (%s,%s,%s)\n" % (state, read, replace, arrow, new_state))
 
 with open(src_file, "r") as read:
     src = [x.split("//")[0].strip().split(" ") for x in read.read().split("\n") if x.split("//")[0].strip() != ""]
