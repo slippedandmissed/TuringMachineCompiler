@@ -7,7 +7,7 @@ if len(sys.argv) < 2:
     print("Not enough arguments provided")
     sys.exit()
 
-debug = False
+debug = True
 
 state_codes = {
     "start": "start",
@@ -92,7 +92,12 @@ variable_names = list(set(variable_names))
 
 def push_cmd(a, line):
     cmd = "PUSH"
-    arg = line[1]
+    arg = line[1][1:].lstrip("0")
+    minus = line[1][0] == "-"
+    if arg == "":
+        arg = "0"
+    elif minus:
+        arg = "-" + arg
     for d in digits:
         write(f"ready{a}", d, d, ">", f"sready{a}", cmd)
         write(f"sready{a}", d, d, ">", f"sready{a}", cmd) # Could remove?
