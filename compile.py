@@ -256,8 +256,8 @@ def return_cmd(a, line):
         recurse(f"popping{a}_{d}", 1)
 
     for i in range(pow(10, max_depth)):
-        write(f"popping{a}_{i}", ";", "", "<", f"ready{str(i)[::-1]}", cmd)
-        write(f"popping{a}_{i}", "#", "#", ">", f"ready{str(i)[::-1]}", cmd)
+        write(f"popping{a}_{'_'.join(list(str(i)))}", ";", "", "<", f"ready{str(i)[::-1]}", cmd)
+        write(f"popping{a}_{'_'.join(list(str(i)))}", "#", "#", ">", f"ready{str(i)[::-1]}", cmd)
 
 def bigger_cmd(a, line):
     cmd = "BIGGER"
