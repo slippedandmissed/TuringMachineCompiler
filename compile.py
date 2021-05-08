@@ -359,7 +359,7 @@ def add_cmd(a, line, mux=add_together):
             write(f"checkdigit{a}_{d}", f"!{e}", e, ">", f"checkdigithere{a}_{d}", cmd)
         write(f"checkdigithere{a}_{d}", "-", "-", ">", f"checkdigithere{a}_{d}", cmd)
         for e in non_minus_digits:
-            ans, c = mux(False, True, d, e, False, True)
+            ans, c = add_together(False, True, d, e, False, True)
             if c:
                 write(f"checkdigithere{a}_{d}", e, e, "<", f"failed{a}", cmd)
             elif ans != 0:
