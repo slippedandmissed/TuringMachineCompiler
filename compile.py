@@ -262,24 +262,26 @@ def return_cmd(a, line):
 def bigger_cmd(a, line):
     cmd = "BIGGER"
     
+def add_together(a_negative, b_negative, a, b, carry, a_bigger):
+    a = int(0 if a == "-" else a)
+    b = int(0 if b == "-" else b)
+    
+    if (a_negative and b_negative) or (not a_negative and not b_negative):
+        s = a + b
+        if carry:
+            s += 1
+        return [s % 10, s >= 10]
+    else:
+        s = (a - b) if a_bigger else (b - a)
+        if carry:
+            s -= 1
+        return [s % 10, s < 0]
 
-def add_cmd(a, line):
+def subtract_together(a_negative, b_negative, a, b, carry, a_bigger):
+    return add_together(a_negative, not b_negative, a, b, carry, a_bigger)
+
+def add_cmd(a, line, mux=add_together):
     cmd = "ADD"
-
-    def add_together(a_negative, b_negative, a, b, carry, a_bigger):
-        a = int(0 if a == "-" else a)
-        b = int(0 if b == "-" else b)
-        
-        if (a_negative and b_negative) or (not a_negative and not b_negative):
-            s = a + b
-            if carry:
-                s += 1
-            return [s % 10, s >= 10]
-        else:
-            s = (a - b) if a_bigger else (b - a)
-            if carry:
-                s -= 1
-            return [s % 10, s < 0]
 
     non_minus_digits = [d for d in digits if d != "-"]
     write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
@@ -357,7 +359,7 @@ def add_cmd(a, line):
             write(f"checkdigit{a}_{d}", f"!{e}", e, ">", f"checkdigithere{a}_{d}", cmd)
         write(f"checkdigithere{a}_{d}", "-", "-", ">", f"checkdigithere{a}_{d}", cmd)
         for e in non_minus_digits:
-            ans, c = add_together(False, True, d, e, False, True)
+            ans, c = mux(False, True, d, e, False, True)
             if c:
                 write(f"checkdigithere{a}_{d}", e, e, "<", f"failed{a}", cmd)
             elif ans != 0:
@@ -427,8 +429,8 @@ def add_cmd(a, line):
                         for f in digits + ["!", "~"]:
                             write(f"gotnextdigits{a}_{b}_{s1}_{s2}_{e}_{d}", f, f, ">", f"gotnextdigits{a}_{b}_{s1}_{s2}_{e}_{d}", cmd)
                         if d != "-" or e != "-":
-                            sum_no_carry = add_together(s1=="0", s2=="0", e, d, False, b)
-                            sum_carry = add_together(s1=="0", s2=="0", e, d, True, b)
+                            sum_no_carry = mux(s1=="0", s2=="0", e, d, False, b)
+                            sum_carry = mux(s1=="0", s2=="0", e, d, True, b)
                             write(f"gotnextdigits{a}_{b}_{s1}_{s2}_{e}_{d}", "", sum_no_carry[0], ">" if sum_no_carry[1] else "<", f"dropcarry{a}_{b}_{s1}_{s2}" if sum_no_carry[1] else f"gotogetnextdigits{a}_{b}_{s1}_{s2}", cmd)
                             write(f"gotnextdigits{a}_{b}_{s1}_{s2}_{e}_{d}", "@", sum_carry[0], ">" if sum_carry[1] else "<", f"dropcarry{a}_{b}_{s1}_{s2}" if sum_carry[1] else f"gotogetnextdigits{a}_{b}_{s1}_{s2}", cmd)
                 write(f"gotnextdigits{a}_{b}_{s1}_{s2}_-_-", "", "", "<", f"removezeros{a}_{result_negative}", cmd)
@@ -512,7 +514,8 @@ commands = {
     "JLZ": [[number], jlz_cmd],
     "GOTO": [[valid_label], goto_cmd],
     "RETURN": [[], return_cmd],
-    "ADD": [[], add_cmd]
+    "ADD": [[], add_cmd],
+    "SUB": [[], lambda a, line: add_cmd(a, line, subtract_together)]
 }
 
 for a, line in enumerate(src):
