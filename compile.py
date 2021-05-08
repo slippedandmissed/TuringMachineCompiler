@@ -432,7 +432,8 @@ def add_cmd(a, line):
                             write(f"gotnextdigits{a}_{b}_{s1}_{s2}_{e}_{d}", "", sum_no_carry[0], ">" if sum_no_carry[1] else "<", f"dropcarry{a}_{b}_{s1}_{s2}" if sum_no_carry[1] else f"gotogetnextdigits{a}_{b}_{s1}_{s2}", cmd)
                             write(f"gotnextdigits{a}_{b}_{s1}_{s2}_{e}_{d}", "@", sum_carry[0], ">" if sum_carry[1] else "<", f"dropcarry{a}_{b}_{s1}_{s2}" if sum_carry[1] else f"gotogetnextdigits{a}_{b}_{s1}_{s2}", cmd)
                 write(f"gotnextdigits{a}_{b}_{s1}_{s2}_-_-", "", "", "<", f"removezeros{a}_{result_negative}", cmd)
-                write(f"gotnextdigits{a}_{b}_{s1}_{s2}_-_-", "@", 1 if s1 == s2 else "", "<", f"removezeros{a}_{result_negative}", cmd)
+                write(f"gotnextdigits{a}_{b}_{s1}_{s2}_-_-", "@", 1 if s1 == s2 else "", ">", f"putcarry{a}_{result_negative}", cmd)
+                write(f"putcarry{a}_{result_negative}", "", "", "<", f"removezeros{a}_{result_negative}", cmd)
                 write(f"dropcarry{a}_{b}_{s1}_{s2}", "", "@", "<", f"gotogetnextdigits{a}_{b}_{s1}_{s2}", cmd)
                 for d in non_minus_digits:
                     write(f"gotogetnextdigits{a}_{b}_{s1}_{s2}", d, d, "<", f"gotogetnextdigits{a}_{b}_{s1}_{s2}", cmd)
