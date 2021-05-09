@@ -77,7 +77,15 @@ while change:
         x = tape[i]
         line += " " if x == "" else x
         underline += (chr(8254) if i == currentIndex else " ")*(1 if x == "" else len(x))
-        nonBlank = True
     print(line+"...")
     print(underline)
     change = advance()
+
+print("\nTape:")
+print(chr(8254)*5)
+line = ""
+
+for i, x in enumerate(tape):
+    line += " " if x == "" else x
+
+print(line.strip())
