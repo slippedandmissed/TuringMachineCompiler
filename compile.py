@@ -41,6 +41,7 @@ with open(out_file, "w") as out:
     out.write("#!./turing.py\n")
 
 digits = list("-0123456789")
+non_minus_digits = [d for d in digits if d != "-"]
 
 for i in digits + [";"]:
     write("start", i, i, "<", "start")
@@ -100,7 +101,6 @@ def push_cmd(a, line):
         arg = "-" + arg
     for d in digits:
         write(f"ready{a}", d, d, ">", f"sready{a}", cmd)
-        write(f"sready{a}", d, d, ">", f"sready{a}", cmd) # Could remove?
     write(f"ready{a}", "", arg[0], ">", f"put1_{a}", cmd)
     write(f"sready{a}", "", ";", ">", f"put0_{a}", cmd)
     for i, d in enumerate(arg):
@@ -221,7 +221,6 @@ def jlz_cmd(a, line):
     cmd = "JLZ"
     offset = int(line[1])
     write(f"ready{a}", "", "", ">", "runtime_error", cmd)
-    non_minus_digits = [d for d in digits if d != "-"]
     for d in non_minus_digits:
         write(f"ready{a}", d, "", "<", f"checking{a}", cmd)
         write(f"checking{a}", d, "", "<", f"checking{a}", cmd)
@@ -280,10 +279,9 @@ def add_together(a_negative, b_negative, a, b, carry, a_bigger):
 def subtract_together(a_negative, b_negative, a, b, carry, a_bigger):
     return add_together(a_negative, not b_negative, a, b, carry, a_bigger)
 
-def add_cmd(a, line, mux=add_together):
+def add_cmd(a, line, mux=add_together, bflip=False):
     cmd = "ADD"
 
-    non_minus_digits = [d for d in digits if d != "-"]
     write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
     for d in non_minus_digits:
         write(f"ready{a}", d, f"!{d}", ">", f"inc{a}", cmd)
@@ -408,7 +406,7 @@ def add_cmd(a, line, mux=add_together):
             write(f"check1sign{a}_{b}_{s2}", "-", "-", ">", f"gotsigns{a}_{b}_0_{s2}", cmd)
         for s1 in "01":
             for s2 in "01":
-                result_negative = (b and s1 == "0") or (not b and s2 == "0")
+                result_negative = (b  and s1 == "0") or (not b and s2 == ("1" if bflip else "0"))
                 for d in digits + ["!", "~"]:
                     write(f"gotsigns{a}_{b}_{s1}_{s2}", d, d, ">", f"gotsigns{a}_{b}_{s1}_{s2}", cmd)
                 write(f"gotsigns{a}_{b}_{s1}_{s2}", "", "!", "<", f"getnextdigits{a}_{b}_{s1}_{s2}", cmd)
@@ -482,18 +480,191 @@ def add_cmd(a, line, mux=add_together):
     
     write(f"getready{a}", "", "", "<", f"ready{a+1}", cmd)
 
+def lshift_cmd(a, line):
+    cmd = "LSHIFT"
+    amount = int(line[1])
+
+    write(f"ready{a}", "", "", ">", "runtime_error", cmd)
+    for d in digits:
+        write(f"ready{a}", d, d, "<", f"ready{a}", cmd)
+    for d in ";#":
+        write(f"ready{a}", d, d, ">", f"checkfirst{a}", cmd)
+    for d in digits:
+        if d == "0":
+            continue
+        write(f"checkfirst{a}", d, d, ">", f"fine{a}", cmd)
+    for d in non_minus_digits:
+        write(f"fine{a}", d, d, ">", f"fine{a}", cmd)
+    write(f"fine{a}", "", "", "<", f"sready{a}", cmd)
+
+    write(f"checkfirst{a}", "0", "0", ">", f"getready{a}", cmd)
+    write(f"getready{a}", "", "", "<", f"ready{a+1}", cmd)
+
+    write(f"sready{a}", "", "", ">", "runtime_error", cmd)
+    for d in digits:
+        write(f"sready{a}", d, d, ">", f"add{a}_0", cmd)
+    for i in range(amount+1):
+        write(f"add{a}_{i}", "", "0" if i < amount else "", ">" if i < amount else "<", f"add{a}_{i+1}" if i < amount else f"ready{a+1}", cmd)
+
+def rshift_cmd(a, line):
+    cmd = "RSHIFT"
+    amount = int(line[1])
+
+    write(f"ready{a}", "", "", ">", "runtime_error", cmd)
+    for d in digits:
+        write(f"ready{a}", d, d, ">", f"startremoving{a}", cmd)
+    write(f"startremoving{a}", "", "", "<", f"remove{a}_0", cmd)
+    for i in range(amount):
+        for d in non_minus_digits:
+            write(f"remove{a}_{i}", d, "", "<", f"remove{a}_{i+1}", cmd)
+    for i in range(amount+1):
+        write(f"remove{a}_{i}", "-", "0", ">", f"getready{a}", cmd)
+        for d in ";#":
+            write(f"remove{a}_{i}", d, d, ">", f"putzeroback{a}", cmd)
+    write(f"putzeroback{a}", "", "0", ">", f"getready{a}", cmd)
+    write(f"getready{a}", "", "", "<", f"ready{a+1}", cmd)
+    for d in non_minus_digits:
+        write(f"remove{a}_{amount}", d, d, ">", f"getready{a}", cmd)
+
+def reverse_cmd(a, line):
+    cmd = "REVERSE"
+
+    write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
+    for d in non_minus_digits:
+        write(f"ready{a}", d, d, ">", f"dropmarker{a}", cmd)
+    write(f"dropmarker{a}", "", "!", "<", f"get{a}", cmd)
+    for d in non_minus_digits:
+        write(f"get{a}", d, d, "<", f"get{a}", cmd)
+    for d in ";#-!":
+        write(f"get{a}", d, d, ">", f"gethere{a}", cmd)
+    for d in non_minus_digits:
+        write(f"gethere{a}", d, "!", ">", f"carrying{a}_{d}", cmd)
+        for e in non_minus_digits + ["!"]:
+            write(f"carrying{a}_{d}", e, e, ">", f"carrying{a}_{d}", cmd)
+        write(f"carrying{a}_{d}", "", d, "<", f"gotoget{a}", cmd)
+    write(f"gotoget{a}", "!", "!", "<", f"goingtoget{a}", cmd)
+    write(f"goingtoget{a}", "!", "!", "<", f"goingtoget{a}", cmd)
+    for d in non_minus_digits:
+        write(f"gotoget{a}", d, d, "<", f"gotoget{a}", cmd)
+        write(f"goingtoget{a}", d, d, "<", f"get{a}", cmd)
+    for d in ";#-":
+        write(f"goingtoget{a}", d, d, ">", f"copy{a}", cmd)
+    for d in non_minus_digits + ["!"]:
+        write(f"copy{a}", d, d, ">", f"copy{a}", cmd)
+    write(f"copy{a}", "", "", "<", f"copyhere{a}", cmd)
+    for d in non_minus_digits:
+        write(f"copyhere{a}", d, "", "<", f"copying{a}_{d}", cmd)
+        for e in non_minus_digits:
+            write(f"copying{a}_{d}", e, e, "<", f"copying{a}_{d}", cmd)
+        write(f"copying{a}_{d}", "!", "!", "<", f"copyinghere{a}_{d}", cmd)
+        write(f"copyinghere{a}_{d}", "!", "!", "<", f"copyinghere{a}_{d}", cmd)
+        for e in non_minus_digits + [";", "#", "-"]:
+            write(f"copyinghere{a}_{d}", e, e, ">", f"drophere{a}_{d}", cmd)
+        write(f"drophere{a}_{d}", "!", d, ">", f"copy{a}", cmd)
+    write(f"copyhere{a}", "!", "", "<", f"ready{a+1}", cmd)
+
+        
+def last_cmd(a, line):
+    cmd = "LAST"
+    amount = int(line[1])
+
+    write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
+
+    for d in non_minus_digits:
+        write(f"ready{a}", d, f"!{d}", "<", f"protect{a}_0", cmd)
+    
+    for i in range(amount-1):
+        for d in non_minus_digits:
+            write(f"protect{a}_{i}", d, f"!{d}", "<", f"protect{a}_{i+1}", cmd)
+        for d in ";#":
+            write(f"protect{a}_{i}", d, d, ">", f"copyback{a}", cmd)
+        write(f"protect{a}_{i}", "-", "!", ">", f"copyback{a}", cmd)
+    
+    for d in non_minus_digits:
+        write(f"protect{a}_{amount-1}", d, "!", "<", f"protect{a}_{amount-1}", cmd)
+    for d in ";#":
+        write(f"protect{a}_{amount-1}", d, d, ">", f"copyback{a}", cmd)
+    write(f"protect{a}_{amount-1}", "-", "!", ">", f"copyback{a}", cmd)
+    write(f"copyback{a}", "!", "!", ">", f"copyback{a}", cmd)
+    for d in non_minus_digits:
+        write(f"copyback{a}", f"!{d}", "!", "<", f"copying{a}_{d}", cmd)
+        write(f"copying{a}_{d}", "!", "!", "<", f"copying{a}_{d}", cmd)
+        for e in digits + [";", "#"]:
+            write(f"copying{a}_{d}", e, e, ">", f"drophere{a}_{d}", cmd)
+        write(f"drophere{a}_{d}", "!", d, ">", f"copyback{a}", cmd)
+    write(f"copyback{a}", "", "", "<", f"cleanup{a}", cmd)
+    write(f"cleanup{a}", "!", "", "<", f"cleanup{a}", cmd)
+    for d in non_minus_digits:
+        write(f"cleanup{a}", d, d, ">", f"getready{a}", cmd)
+    write(f"getready{a}", "", "", "<", f"ready{a+1}", cmd)
+
+def digits_cmd(a, line):
+    cmd = "DIGITS"
+
+    write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
+
+    for d in non_minus_digits:
+        write(f"ready{a}", d, "!", ">", f"extend{a}", cmd)
+        write(f"sready{a}", d, "!", ">", f"inc{a}", cmd)
+    write(f"extend{a}", "", "!", ">", f"inc{a}", cmd)
+    write(f"sready{a}", "!", "!", "<", f"sready{a}", cmd)
+    for d in ";#":
+        write(f"sready{a}", d, d, ">", f"copy{a}", cmd)
+    write(f"sready{a}", "-", "!", ">", f"copy{a}", cmd)
+    write(f"inc{a}", "!", "!", ">", f"inc{a}", cmd)
+    write(f"inc{a}", "", "1", "<", f"goback{a}", cmd)
+    write(f"dropcarry{a}", "", "1", "<", f"goback{a}", cmd)
+    for d in non_minus_digits:
+        write(f"goback{a}", d, d, "<", f"goback{a}", cmd)
+    write(f"goback{a}", "!", "!", "<", f"sready{a}", cmd)
+    for d in non_minus_digits:
+        ans, c = add_together(False, False, d, "1", False, True)
+        write(f"inc{a}", d, ans, ">" if c else "<", f"dropcarry{a}" if c else f"goback{a}", cmd)
+    
+    for d in non_minus_digits + ["!"]:
+        write(f"copy{a}", d, d, ">", f"copy{a}", cmd)
+    write(f"copy{a}", "", "", "<", f"copyhere{a}", cmd)
+    for d in non_minus_digits:
+        write(f"copyhere{a}", d, "", "<", f"copying{a}_{d}", cmd)
+        for e in non_minus_digits:
+            write(f"copying{a}_{d}", e, e, "<", f"copying{a}_{d}", cmd)
+        write(f"copying{a}_{d}", "!", "!", "<", f"copyinghere{a}_{d}", cmd)
+        write(f"copyinghere{a}_{d}", "!", "!", "<", f"copyinghere{a}_{d}", cmd)
+        for e in non_minus_digits + [";", "#"]:
+            write(f"copyinghere{a}_{d}", e, e, ">", f"drophere{a}_{d}", cmd)
+        write(f"drophere{a}_{d}", "!", d, ">", f"copy{a}", cmd)
+    write(f"copyhere{a}", "!", "", "<", f"cleanup{a}", cmd)
+    write(f"cleanup{a}", "!", "", "<", f"cleanup{a}", cmd)
+    for d in non_minus_digits:
+        write(f"cleanup{a}", d, d, ">", f"getready{a}", cmd)
+    write(f"getready{a}", "", "", "<", f"ready{a+1}", cmd)
+
 def label(l):
     def dec(func):
         func.label = l
         return func
     return dec
 
-@label("number")
+@label("integer")
 def number(x):
     for i, d in enumerate(x):
         if d not in digits and (i == 0 or d != "-"):
             return False
     return len(x) > 0 and (x[0] != "-" or len(x) > 1)
+
+@label("natural number")
+def natural_number(x):
+    for i, d in enumerate(x):
+        if d not in non_minus_digits:
+            return False
+    return True
+
+@label("positive integer")
+def positive_number(x):
+    for i, d in enumerate(x):
+        if d not in non_minus_digits:
+            return False
+    return int(x) > 0
 
 @label("variable name")
 def var_name(x):
@@ -515,7 +686,12 @@ commands = {
     "GOTO": [[valid_label], goto_cmd],
     "RETURN": [[], return_cmd],
     "ADD": [[], add_cmd],
-    "SUB": [[], lambda a, line: add_cmd(a, line, subtract_together)]
+    "SUB": [[], lambda a, line: add_cmd(a, line, subtract_together, True)],
+    "LSHIFT": [[natural_number], lshift_cmd],
+    "RSHIFT": [[natural_number], rshift_cmd],
+    "REVERSE": [[], reverse_cmd],
+    "LAST": [[positive_number], last_cmd],
+    "DIGITS": [[], digits_cmd]
 }
 
 for a, line in enumerate(src):
