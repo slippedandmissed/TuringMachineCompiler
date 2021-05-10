@@ -37,9 +37,6 @@ def write(state, read, replace, direction, new_state, cmd="%NOCMD%"):
 with open(src_file, "r") as read:
     src = [x.split("//")[0].strip().split(" ") for x in read.read().split("\n") if x.split("//")[0].strip() != ""]
 
-with open(out_file, "w") as out:
-    out.write("#!./turing.py\n")
-
 digits = list("-0123456789")
 non_minus_digits = [d for d in digits if d != "-"]
 
@@ -527,6 +524,7 @@ def rshift_cmd(a, line):
         write(f"remove{a}_{amount}", d, d, ">", f"getready{a}", cmd)
 
 def reverse_cmd(a, line):
+    # TODO remove leading zeros
     cmd = "REVERSE"
 
     write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
@@ -565,6 +563,7 @@ def reverse_cmd(a, line):
 
         
 def last_cmd(a, line):
+    # TODO remove leading zeros
     cmd = "LAST"
     amount = int(line[1])
 
