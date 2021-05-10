@@ -524,12 +524,14 @@ def rshift_cmd(a, line):
         write(f"remove{a}_{amount}", d, d, ">", f"getready{a}", cmd)
 
 def reverse_cmd(a, line):
-    # TODO remove leading zeros
     cmd = "REVERSE"
 
     write(f"ready{a}", "", "", ">", f"runtime_error", cmd)
     for d in non_minus_digits:
+        if d == "0":
+            continue
         write(f"ready{a}", d, d, ">", f"dropmarker{a}", cmd)
+    write(f"ready{a}", "0", "", "<", f"ready{a}", cmd)
     write(f"dropmarker{a}", "", "!", "<", f"get{a}", cmd)
     for d in non_minus_digits:
         write(f"get{a}", d, d, "<", f"get{a}", cmd)
@@ -563,7 +565,6 @@ def reverse_cmd(a, line):
 
         
 def last_cmd(a, line):
-    # TODO remove leading zeros
     cmd = "LAST"
     amount = int(line[1])
 
@@ -582,8 +583,15 @@ def last_cmd(a, line):
     for d in non_minus_digits:
         write(f"protect{a}_{amount-1}", d, "!", "<", f"protect{a}_{amount-1}", cmd)
     for d in ";#":
-        write(f"protect{a}_{amount-1}", d, d, ">", f"copyback{a}", cmd)
-    write(f"protect{a}_{amount-1}", "-", "!", ">", f"copyback{a}", cmd)
+        write(f"protect{a}_{amount-1}", d, d, ">", f"removetrailingzeros{a}", cmd)
+    write(f"protect{a}_{amount-1}", "-", "!", ">", f"removetrailingzeros{a}", cmd)
+    write(f"removetrailingzeros{a}", "!", "!", ">", f"removetrailingzeros{a}", cmd)
+    write(f"removetrailingzeros{a}", "!0", "!", ">", f"removetrailingzeros{a}", cmd)
+    for d in non_minus_digits:
+        if d == "0":
+            continue
+        write(f"removetrailingzeros{a}", f"!{d}", "!", "<", f"copying{a}_{d}", cmd)
+    write(f"removetrailingzeros{a}", "", "", "<", f"copying{a}_0", cmd)
     write(f"copyback{a}", "!", "!", ">", f"copyback{a}", cmd)
     for d in non_minus_digits:
         write(f"copyback{a}", f"!{d}", "!", "<", f"copying{a}_{d}", cmd)
