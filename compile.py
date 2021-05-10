@@ -244,7 +244,7 @@ def return_cmd(a, line):
             return
         for d in digits:
             write(current, d, "", "<", f"{current}_{d}", cmd)
-            recurse(f"{current}{d}", depth+1)
+            recurse(f"{current}_{d}", depth+1)
 
     for d in digits:
         write(f"ready{a}", d, "", "<", f"popping{a}_{d}", cmd)

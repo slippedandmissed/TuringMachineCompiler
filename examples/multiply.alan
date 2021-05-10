@@ -1,3 +1,9 @@
+// This program multiplies together its arguments
+// For example, running
+//      multiply.tur "1234;5678"
+// will result in an output of
+//      #7006652
+
 SET B
 SET A
 PUSHADDR 6
@@ -11,11 +17,13 @@ UNSET R
 GOTO end
 
 :multiply
+SET V_
+LOAD V_
 REVERSE
 SET V
 SET U
 
-LOAD V
+LOAD V_
 DIGITS
 SET C_
 PUSH 0
@@ -32,7 +40,7 @@ JLZ 37
 
 LOAD U
 LOAD V
-LOAD V
+LOAD V_
 DIGITS
 LOAD C_
 SUB
@@ -80,6 +88,7 @@ SET R
 
 UNSET U
 UNSET V
+UNSET V_
 RETURN
 
 :mulrep

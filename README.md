@@ -66,6 +66,8 @@ With one instruction per line.
 
 In future versions this output will also optionally be available in JSON format.
 
+It is assumed that upon starting, the initial state of the Turing machine will be `start`. This is indeed the case if the code is executed using other of the included Turing machine simulators.
+
 ## Running compiled code
 
 The output `.tur` file can be executed using either of the two Turing machine simulators contained within this repo.
@@ -101,3 +103,11 @@ python3.9 cli.py /path/to/executable.tur "1234;5678"
 ```
 
 To start with the numbers 1234 and 5678 on the tape. These will automatically be put (in order) onto the stack, and so can be thought of as arguments to the executable.
+
+### Output
+
+The output of the program will be the final contents of the tape (including the environment and the stack).
+
+How to interpret this output will be up to the developer of the program.
+
+The final state of the turing machine should either be `done` or `runtime_error`.

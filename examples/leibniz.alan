@@ -1,3 +1,13 @@
+// This program calculated approximations of Pi
+// using the Leibniz formula. The input of the
+// program is the number of terms to use.
+// For example, running
+//      Leibniz.tur "5"
+// will result in an output of
+//      #3156;945
+// Because the first 5 terms of the Leibniz
+// formula gives 3156/945 = 3.3397
+
 SET K
 PUSH -1
 SET T
@@ -62,11 +72,13 @@ SET D
 GOTO loop
 
 :multiply
+SET V_
+LOAD V_
 REVERSE
 SET V
 SET U
 
-LOAD V
+LOAD V_
 DIGITS
 SET C_
 PUSH 0
@@ -83,7 +95,7 @@ JLZ 37
 
 LOAD U
 LOAD V
-LOAD V
+LOAD V_
 DIGITS
 LOAD C_
 SUB
@@ -131,6 +143,7 @@ SET R
 
 UNSET U
 UNSET V
+UNSET V_
 RETURN
 
 :mulrep
