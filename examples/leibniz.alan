@@ -2,7 +2,7 @@
 // using the Leibniz formula. The input of the
 // program is the number of terms to use.
 // For example, running
-//      Leibniz.tur "5"
+//      leibniz.tur "5"
 // will result in an output of
 //      #3156;945
 // Because the first 5 terms of the Leibniz
