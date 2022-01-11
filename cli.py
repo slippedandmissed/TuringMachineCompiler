@@ -2,6 +2,7 @@
 
 import sys
 
+
 tape = [""]
 if len(sys.argv) > 2:
     tape = list(sys.argv[2])
@@ -67,22 +68,8 @@ span = 20
 
 change = True
 while change:
-    sname = state.ljust(stateWidth)
-    if len(sname) > stateWidth:
-        sname = sname[:stateWidth-3]+"..."
-    print(f"{sname}: ", end="")
-    line = "..."
-    underline = " "*(stateWidth+5)
-    for i in range(max(0, currentIndex-span), min(currentIndex+span+1, len(tape))):
-        x = tape[i]
-        line += " " if x == "" else x
-        underline += (chr(8254) if i == currentIndex else " ")*(1 if x == "" else len(x))
-    print(line+"...")
-    print(underline)
     change = advance()
 
-print("\nTape:")
-print(chr(8254)*5)
 line = ""
 
 for i, x in enumerate(tape):
