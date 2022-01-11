@@ -5,6 +5,7 @@
 
 int main(int argc, char **argv)
 {
+
     if (argc != 2 && argc != 3)
     {
         printf("Usage: %s [program] [initialTape]\n", argv[0]);
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
     }
 
     int instructionCount;
-    struct Instruction *instructions = parseInstructions(fp, &instructionCount);
+    struct HashMap *instructions = parseInstructions(fp, &instructionCount);
     fclose(fp);
 
     char *initialTape;

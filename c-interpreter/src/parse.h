@@ -1,4 +1,5 @@
 #pragma once
+#include "hashmap.h"
 
 struct Instruction
 {
@@ -11,4 +12,4 @@ struct Instruction
 
 void printInstruction(struct Instruction);
 
-struct Instruction *parseInstructions(FILE *fp, int *count);
+struct HashMap *parseInstructions(FILE *fp, int *count);

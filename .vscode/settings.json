@@ -4,6 +4,8 @@
         "string.h": "c",
         "stdio.h": "c",
         "tape.h": "c",
-        "parse.h": "c"
+        "parse.h": "c",
+        "hashmap.h": "c",
+        "params.h": "c"
     }
 }

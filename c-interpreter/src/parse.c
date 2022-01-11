@@ -14,7 +14,7 @@ char *allocateCharArrayOnHeap(int n)
     return (char *)malloc(n * sizeof(char));
 }
 
-struct Instruction parseSingleInstruction(char *line)
+struct Instruction *parseSingleInstruction(char *line)
 {
     char *startState = allocateCharArrayOnHeap(MAX_STATE_NAME_SIZE);
     char *endState = allocateCharArrayOnHeap(MAX_STATE_NAME_SIZE);
@@ -60,18 +60,19 @@ struct Instruction parseSingleInstruction(char *line)
     {
         endState[i++] = line[offset++];
     }
-    endState[i] = '\0';
+    endState[i] = '\0';        
+    
+    struct Instruction *instruction = (struct Instruction *)malloc(sizeof(struct Instruction));
+    instruction->startState = startState;
+    instruction->endState = endState;
+    instruction->matchSymbol = matchSymbol;
+    instruction->replaceWith = replaceWith;
+    instruction->offset = strcmp(arrow, "←") == 0 ? -1 : 1;
 
-    struct Instruction instruction = {
-        startState,
-        endState,
-        matchSymbol,
-        replaceWith,
-        strcmp(arrow, "←") == 0 ? -1 : 1};
     return instruction;
 }
 
-struct Instruction *parseInstructions(FILE *fp, int *count)
+struct HashMap *parseInstructions(FILE *fp, int *count)
 {
     *count = 0;
     while (!feof(fp))
@@ -82,12 +83,18 @@ struct Instruction *parseInstructions(FILE *fp, int *count)
         }
     }
 
-    struct Instruction *instructions = (struct Instruction *)malloc((*count) * sizeof(struct Instruction));
+    struct HashMap *instructions = newHashMap(1024);
     fseek(fp, 0, SEEK_SET);
     char line[MAX_LINE_LENGTH];
     for (int i = 0; i < (*count); i++)
     {
-        instructions[i] = parseSingleInstruction(fgets(line, 1024, fp));
+        struct Instruction *instruction = parseSingleInstruction(fgets(line, 1024, fp));
+        struct HashMap *symbolHashMap = (struct HashMap *)hashMapGet(instructions, instruction->startState);
+        if (symbolHashMap == NULL) {
+            symbolHashMap = newHashMap(128);
+            hashMapPut(instructions, instruction->startState, symbolHashMap);
+        }
+        hashMapPut(symbolHashMap, instruction->matchSymbol, instruction);
     }
 
     return instructions;
