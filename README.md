@@ -93,16 +93,29 @@ To start with the numbers 1234 and 5678 on the tape. These will automatically be
 The other simulator is entirely in the command line and it is much faster. It can be run with:
 
 ```bash
-python3.9 cli.py /path/to/executable.tur
+./cli /path/to/executable.tur
 ```
 
 To run the program with an initially empty tape, or
 
 ```bash
-python3.9 cli.py /path/to/executable.tur "1234;5678"
+./cli /path/to/executable.tur "1234;5678"
 ```
 
 To start with the numbers 1234 and 5678 on the tape. These will automatically be put (in order) onto the stack, and so can be thought of as arguments to the executable.
+
+### Building CLI from source
+
+To build from source, you must have gcc and cmake installed.
+
+```bash
+cd c-interpreter
+make
+cp ./dist/cli ../cli
+cd ..
+```
+
+Note that on Windows, this binary might be called `cli.exe` rather than `cli`
 
 ### Output
 
