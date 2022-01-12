@@ -40,5 +40,25 @@ int main(int argc, char **argv)
 
     printf("%s\n", tapeToString(final, 0));
 
+    for (int i=0; i<instructions->size; i++) {
+        struct HashMapLL *ll = instructions->array[i];
+        while (ll != NULL) {
+            struct HashMap *inner = (struct HashMap *) ll->value;
+            for (int j=0; j<inner->size; j++) {
+                struct HashMapLL *ill = inner->array[j];
+                while (ill != NULL) {
+                    struct Instruction *inst = (struct Instruction *) ill->value;
+                    freeInstruction(inst);
+                    ill = ill->next;
+                }
+            }
+            freeHashMap(inner);
+            ll = ll->next;
+        }
+    }
+    freeHashMap(instructions);
+
+    freeTape(final);
+
     return 0;
 }

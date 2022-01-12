@@ -16,6 +16,21 @@ struct HashMap *newHashMap(int size)
     return ptr;
 }
 
+void freeHashMap(struct HashMap *ptr)
+{
+    for (int i = 0; i < ptr->size; i++)
+    {
+        if (ptr->array[i] != NULL)
+        {
+            free(ptr->array[i]->key);
+            free(ptr->array[i]);
+        }
+    }
+    free(ptr->array);
+    free(ptr);
+    return;
+}
+
 unsigned int hash(char *key, int size)
 {
 

@@ -12,4 +12,6 @@ struct Instruction
 
 void printInstruction(struct Instruction);
 
+void freeInstruction(struct Instruction *);
+
 struct HashMap *parseInstructions(FILE *fp, int *count);

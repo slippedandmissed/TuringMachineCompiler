@@ -69,7 +69,7 @@ char *tapeToString(struct Cell *current, int shouldColorCurrent)
 
     char *changeToRed = "\033[0;31m";
     char *changeToBlack = "\033[0m";
-    int size = sizeof(char) * (count * (MAX_SYMBOL_LENGTH - 1) + 1) + (shouldColorCurrent ? (strlen(changeToRed)+strlen(changeToBlack)) : 0);
+    int size = sizeof(char) * (count * (MAX_SYMBOL_LENGTH - 1) + 1) + (shouldColorCurrent ? (strlen(changeToRed) + strlen(changeToBlack)) : 0);
     char *result = (char *)malloc(size);
     int i = 0;
     while (current->next != NULL)
@@ -78,7 +78,8 @@ char *tapeToString(struct Cell *current, int shouldColorCurrent)
         {
             strcpy(result + i, changeToRed);
             i += strlen(changeToRed);
-            if (current->value[0] == '\0') {
+            if (current->value[0] == '\0')
+            {
                 result[i++] = '_';
             }
         }
@@ -95,4 +96,28 @@ char *tapeToString(struct Cell *current, int shouldColorCurrent)
     result[i] = '\0';
 
     return result;
+}
+
+void freeCell(struct Cell* cell) {
+    free(cell->value);
+    free(cell);
+}
+
+void freeTape(struct Cell *current)
+{
+    while (current->next != NULL)
+    {
+        current = current->next;
+    }
+
+    while (current->prev != NULL)
+    {
+        struct Cell *old = current;
+        current = current->prev;
+        freeCell(old);
+    }
+
+    freeCell(current);
+
+    return;
 }

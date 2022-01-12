@@ -20,3 +20,5 @@ struct HashMap *newHashMap(int);
 void hashMapPut(struct HashMap *, char *, void *);
 
 void *hashMapGet(struct HashMap *, char *);
+
+void freeHashMap(struct HashMap *);

@@ -1,4 +1,4 @@
-cli:
+all:
 	gcc -o dist/cli src/cli.c src/parse.c src/tape.c src/interpret.c src/hashmap.c
 
 debug:

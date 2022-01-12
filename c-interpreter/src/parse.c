@@ -14,6 +14,15 @@ char *allocateCharArrayOnHeap(int n)
     return (char *)malloc(n * sizeof(char));
 }
 
+void freeInstruction(struct Instruction *ptr) {
+    free(ptr->startState);
+    free(ptr->endState);
+    free(ptr->matchSymbol);
+    free(ptr->replaceWith);
+    free(ptr);
+    return;
+}
+
 struct Instruction *parseSingleInstruction(char *line)
 {
     char *startState = allocateCharArrayOnHeap(MAX_STATE_NAME_SIZE);
