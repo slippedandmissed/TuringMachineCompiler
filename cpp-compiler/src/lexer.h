@@ -13,7 +13,8 @@
     X(tok_pos_double)       \
     X(tok_neg_double)       \
     X(tok_comment)          \
-    X(tok_function)
+    X(tok_function)         \
+    X(tok_return)
 
 struct PositionInFile
 {

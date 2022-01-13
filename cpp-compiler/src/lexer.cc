@@ -55,6 +55,11 @@ Token Lexer::getNextToken(void)
             token.type = tok_function;
             return token;
         }
+        if (identifierStr == "return")
+        {
+            token.type = tok_return;
+            return token;
+        }
         token.type = tok_identifier;
         token.stringValue = identifierStr;
         return token;

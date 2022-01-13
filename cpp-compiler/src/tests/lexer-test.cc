@@ -37,7 +37,7 @@ void numberTest(void)
 int main(int argc, char **argv)
 {
 
-    numberTest();
+    normalTest();
 
     return 0;
 }
