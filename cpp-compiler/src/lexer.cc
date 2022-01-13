@@ -50,14 +50,59 @@ Token Lexer::getNextToken(void)
             identifierStr += lastChar;
         }
 
-        if (identifierStr == "function")
+        if (identifierStr == "if")
         {
-            token.type = tok_function;
+            token.type = tok_if;
+            return token;
+        }
+        if (identifierStr == "else")
+        {
+            token.type = tok_else;
+            return token;
+        }
+        if (identifierStr == "while")
+        {
+            token.type = tok_while;
+            return token;
+        }
+        if (identifierStr == "for")
+        {
+            token.type = tok_for;
+            return token;
+        }
+        if (identifierStr == "break")
+        {
+            token.type = tok_break;
             return token;
         }
         if (identifierStr == "return")
         {
             token.type = tok_return;
+            return token;
+        }
+        if (identifierStr == "true")
+        {
+            token.type = tok_true_lit;
+            return token;
+        }
+        if (identifierStr == "false")
+        {
+            token.type = tok_false_lit;
+            return token;
+        }
+        if (identifierStr == "int")
+        {
+            token.type = tok_int;
+            return token;
+        }
+        if (identifierStr == "double")
+        {
+            token.type = tok_double;
+            return token;
+        }
+        if (identifierStr == "bool")
+        {
+            token.type = tok_bool;
             return token;
         }
         token.type = tok_identifier;
@@ -89,12 +134,12 @@ Token Lexer::getNextToken(void)
 
         if (isDouble)
         {
-            token.type = isNegative ? tok_neg_double : tok_pos_double;
+            token.type = isNegative ? tok_neg_double_lit : tok_pos_double_lit;
             token.doubleValue = std::stod(numStr);
             return token;
         }
 
-        token.type = isNegative ? tok_neg_int : tok_pos_int;
+        token.type = isNegative ? tok_neg_int_lit : tok_pos_int_lit;
         token.intValue = std::stoll(numStr);
         return token;
     }
@@ -119,7 +164,7 @@ Token Lexer::getNextToken(void)
     }
 
     token.type = tok_symbol;
-    token.stringValue = lastChar;
+    token.charValue = lastChar;
     lastChar = nextChar();
     return token;
 }
@@ -165,16 +210,18 @@ std::string Token::toString(void)
     switch (type)
     {
     case tok_identifier:
-    case tok_symbol:
     case tok_comment:
         string += " \"" + stringValue + "\""; // FIXME: Maybe try to escape this string
         break;
-    case tok_pos_int:
-    case tok_neg_int:
+    case tok_symbol:
+        string += " '" + (charValue == '\'' ? "\\'" : std::string(1,charValue)) + "'";
+        break;
+    case tok_pos_int_lit:
+    case tok_neg_int_lit:
         string += " " + std::to_string(intValue);
         break;
-    case tok_pos_double:
-    case tok_neg_double:
+    case tok_pos_double_lit:
+    case tok_neg_double_lit:
         string += " " + std::to_string(doubleValue);
         break;
     default:

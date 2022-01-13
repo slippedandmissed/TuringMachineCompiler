@@ -8,12 +8,24 @@
     X(tok_space)            \
     X(tok_symbol)           \
     X(tok_identifier)       \
-    X(tok_pos_int)          \
-    X(tok_neg_int)          \
-    X(tok_pos_double)       \
-    X(tok_neg_double)       \
+                            \
+    X(tok_pos_int_lit)      \
+    X(tok_neg_int_lit)      \
+    X(tok_pos_double_lit)   \
+    X(tok_neg_double_lit)   \
+    X(tok_true_lit)         \
+    X(tok_false_lit)        \
+                            \
+    X(tok_int)              \
+    X(tok_double)           \
+    X(tok_bool)             \
+                            \
     X(tok_comment)          \
-    X(tok_function)         \
+    X(tok_if)               \
+    X(tok_else)             \
+    X(tok_for)              \
+    X(tok_while)            \
+    X(tok_break)            \
     X(tok_return)
 
 struct PositionInFile
@@ -40,6 +52,7 @@ public:
     std::string stringValue;
     long long intValue;
     double doubleValue;
+    char charValue;
 
     // Inclusive
     int startIndex;

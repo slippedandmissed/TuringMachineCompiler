@@ -6,7 +6,7 @@
 void normalTest(void)
 {
     std::istringstream testString = std::istringstream(
-        "function add(int x, int y) {\n"
+        "int add(int x, int y) {\n"
         "   return x + y;\n"
         "}");
 
