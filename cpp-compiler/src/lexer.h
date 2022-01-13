@@ -74,10 +74,11 @@ private:
     PositionInFile pos{0, 0};
     char lastChar;
     char nextChar(void);
-    Token getNextToken(void);
+    Token getNextTokenWithoutPositions(void);
     Lexer();
 
 public:
     Lexer(std::istream *stream);
+    Token getNextToken(bool includeSpaces);
     std::vector<Token> getAllTokens(bool includeSpaces);
 };

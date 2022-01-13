@@ -29,7 +29,7 @@ char Lexer::nextChar(void)
     return c;
 }
 
-Token Lexer::getNextToken(void)
+Token Lexer::getNextTokenWithoutPositions(void)
 {
     Token token;
 
@@ -169,6 +169,21 @@ Token Lexer::getNextToken(void)
     return token;
 }
 
+Token Lexer::getNextToken(bool includeSpaces)
+{
+    Token t;
+    do {
+        int startIndex = index - 1;
+        PositionInFile startPos = prevPos;
+        t = getNextTokenWithoutPositions();
+        t.startIndex = startIndex;
+        t.endIndex = index - 1;
+        t.startPos = startPos;
+        t.endPos = prevPos;
+    } while (t.type == tok_space && !includeSpaces);
+    return t;
+}
+
 std::vector<Token> Lexer::getAllTokens(bool includeSpaces)
 {
     std::vector<Token> tokens;
@@ -176,16 +191,7 @@ std::vector<Token> Lexer::getAllTokens(bool includeSpaces)
     Token t;
     do
     {
-        int startIndex = index - 1;
-        PositionInFile startPos = prevPos;
-        t = getNextToken();
-        if (t.type == tok_space && !includeSpaces) {
-            continue;
-        }
-        t.startIndex = startIndex;
-        t.endIndex = index - 1;
-        t.startPos = startPos;
-        t.endPos = prevPos;
+        t = getNextToken(includeSpaces);
         tokens.push_back(t);
     } while (t.type != tok_eof);
 
@@ -217,7 +223,7 @@ std::string Token::toString(void)
         string += " \"" + stringValue + "\""; // FIXME: Maybe try to escape this string
         break;
     case tok_symbol:
-        string += " '" + (charValue == '\'' ? "\\'" : std::string(1,charValue)) + "'";
+        string += " '" + (charValue == '\'' ? "\\'" : std::string(1, charValue)) + "'";
         break;
     case tok_pos_int_lit:
     case tok_neg_int_lit:
