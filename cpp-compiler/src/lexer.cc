@@ -169,7 +169,7 @@ Token Lexer::getNextToken(void)
     return token;
 }
 
-std::vector<Token> Lexer::getAllTokens(void)
+std::vector<Token> Lexer::getAllTokens(bool includeSpaces)
 {
     std::vector<Token> tokens;
 
@@ -179,6 +179,9 @@ std::vector<Token> Lexer::getAllTokens(void)
         int startIndex = index - 1;
         PositionInFile startPos = prevPos;
         t = getNextToken();
+        if (t.type == tok_space && !includeSpaces) {
+            continue;
+        }
         t.startIndex = startIndex;
         t.endIndex = index - 1;
         t.startPos = startPos;

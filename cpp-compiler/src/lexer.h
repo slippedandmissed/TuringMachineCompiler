@@ -79,5 +79,5 @@ private:
 
 public:
     Lexer(std::istream *stream);
-    std::vector<Token> getAllTokens(void);
+    std::vector<Token> getAllTokens(bool includeSpaces);
 };

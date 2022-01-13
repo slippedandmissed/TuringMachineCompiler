@@ -11,7 +11,7 @@ void normalTest(void)
         "}");
 
     Lexer lexer(&testString);
-    std::vector<Token> tokens = lexer.getAllTokens();
+    std::vector<Token> tokens = lexer.getAllTokens(false);
 
     for (Token token : tokens)
     {
@@ -25,7 +25,7 @@ void numberTest(void)
         "123 -123 1.23 -1.23 1.2.3 -1.2.3 12-3");
 
     Lexer lexer(&testString);
-    std::vector<Token> tokens = lexer.getAllTokens();
+    std::vector<Token> tokens = lexer.getAllTokens(false);
 
     for (Token token : tokens)
     {
